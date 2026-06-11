@@ -13,6 +13,7 @@ model User {
   password     String
   transactions Transaction[]
   savingsGoals SavingsGoal[]
+  netWorthItems NetWorthItem[]
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
 }
@@ -42,6 +43,24 @@ model Transaction {
   user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt   DateTime        @default(now())
   updatedAt   DateTime        @updatedAt
+}
+
+model NetWorthItem {
+  id        String           @id @default(uuid())
+  name      String
+  amount    Float
+  type      NetWorthItemType
+  category  String
+  note      String?
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+}
+
+enum NetWorthItemType {
+  ASSET
+  LIABILITY
 }
 
 enum TransactionType {
