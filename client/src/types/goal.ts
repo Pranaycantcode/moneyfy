@@ -16,3 +16,11 @@ export interface GoalProgress {
   daysRemaining: number;
   status: GoalStatus;
 }
+
+export interface CreateGoalInput {
+  title: string;
+  targetAmount: number;
+  currentAmount?: number;
+  targetDate: string;
+  note?: string;
+}

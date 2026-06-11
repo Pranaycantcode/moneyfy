@@ -10,6 +10,9 @@ import { GoalProgress } from "@/types/goal";
 import AddTransactionForm from "@/components/transactions/addTransactionForm";
 import { CreateTransactionInput } from "@/types/transaction";
 import { createTransaction } from "@/services/transactionService";
+import AddGoalForm from "@/components/goals/addGoalForm";
+import { CreateGoalInput } from "@/types/goal";
+import { createGoal } from "@/services/goalService";
 import {
   CategoryBreakdown,
   MonthlyAnalytics,
@@ -71,6 +74,11 @@ const handleAddTransaction = async (
   await loadDashboardData();
 };
 
+const handleAddGoal = async (goalData: CreateGoalInput) => {
+  await createGoal(goalData);
+  await loadDashboardData();
+};
+
 useEffect(() => {
   loadDashboardData();
 }, []);
@@ -100,6 +108,7 @@ useEffect(() => {
         <AnalyticsGrid summary={summary} />
 
         <AddTransactionForm onAddTransaction={handleAddTransaction} />
+        <AddGoalForm onAddGoal={handleAddGoal} />
 
         <div className="grid gap-6 xl:grid-cols-3">
           <div className="xl:col-span-2">
