@@ -13,6 +13,8 @@ import { createTransaction } from "@/services/transactionService";
 import AddGoalForm from "@/components/goals/addGoalForm";
 import { CreateGoalInput } from "@/types/goal";
 import { createGoal } from "@/services/goalService";
+import MonthlyCashflowChart from "@/components/dashboard/monthlyCashflowChart";
+import CategoryBreakdownChart from "@/components/dashboard/categoryBreakdownChart";
 import {
   CategoryBreakdown,
   MonthlyAnalytics,
@@ -39,50 +41,48 @@ export default function Home() {
   const [error, setError] = useState("");
   const [goals, setGoals] = useState<GoalProgress[]>([]);
 
-
   const loadDashboardData = async () => {
-  try {
-    setLoading(true);
+    try {
+      setLoading(true);
 
-    const [summaryData, recentData, monthlyData, categoryData, goalsData] =
-      await Promise.all([
-        getTransactionSummary(),
-        getRecentTransactions(),
-        getMonthlyAnalytics(),
-        getCategoryBreakdown(),
-        getGoalProgress(),
-      ]);
+      const [summaryData, recentData, monthlyData, categoryData, goalsData] =
+        await Promise.all([
+          getTransactionSummary(),
+          getRecentTransactions(),
+          getMonthlyAnalytics(),
+          getCategoryBreakdown(),
+          getGoalProgress(),
+        ]);
 
-    setSummary(summaryData);
-    setTransactions(recentData);
-    setMonthlyAnalytics(monthlyData);
-    setCategoryBreakdown(categoryData);
-    setGoals(goalsData);
-    setError("");
-  } catch (err) {
-    console.error(err);
-    setError("Unable to load dashboard data. Please check your login token.");
-  } finally {
-    setLoading(false);
-  }
-};
+      setSummary(summaryData);
+      setTransactions(recentData);
+      setMonthlyAnalytics(monthlyData);
+      setCategoryBreakdown(categoryData);
+      setGoals(goalsData);
+      setError("");
+    } catch (err) {
+      console.error(err);
+      setError("Unable to load dashboard data. Please check your login token.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-const handleAddTransaction = async (
-  transactionData: CreateTransactionInput,
-) => {
-  await createTransaction(transactionData);
-  await loadDashboardData();
-};
+  const handleAddTransaction = async (
+    transactionData: CreateTransactionInput,
+  ) => {
+    await createTransaction(transactionData);
+    await loadDashboardData();
+  };
 
-const handleAddGoal = async (goalData: CreateGoalInput) => {
-  await createGoal(goalData);
-  await loadDashboardData();
-};
+  const handleAddGoal = async (goalData: CreateGoalInput) => {
+    await createGoal(goalData);
+    await loadDashboardData();
+  };
 
-useEffect(() => {
-  loadDashboardData();
-}, []);
-
+  useEffect(() => {
+    loadDashboardData();
+  }, []);
 
   if (loading) {
     return (
@@ -115,7 +115,7 @@ useEffect(() => {
             <RecentTransactions transactions={transactions} />
           </div>
 
-          <section className="rounded-2xl border border-white/10 bg-white/5 p-5">
+          {/* <section className="rounded-2xl border border-white/10 bg-white/5 p-5">
             <h2 className="text-lg font-semibold">Category Breakdown</h2>
             <div className="mt-5 space-y-3">
               {categoryBreakdown.map((item) => (
@@ -130,10 +130,10 @@ useEffect(() => {
                 </div>
               ))}
             </div>
-          </section>
+          </section> */}
         </div>
 
-        <section className="rounded-2xl border border-white/10 bg-white/5 p-5">
+        {/* <section className="rounded-2xl border border-white/10 bg-white/5 p-5">
           <h2 className="text-lg font-semibold">Monthly Cashflow</h2>
           <div className="mt-5 space-y-3">
             {monthlyAnalytics.map((item) => (
@@ -148,8 +148,12 @@ useEffect(() => {
               </div>
             ))}
           </div>
-        </section>
+        </section> */}
         <GoalProgressList goals={goals} />
+      </div>
+      <div className="grid gap-6 xl:grid-cols-2">
+        <MonthlyCashflowChart data={monthlyAnalytics} />
+        <CategoryBreakdownChart data={categoryBreakdown} />
       </div>
     </DashboardLayout>
   );
