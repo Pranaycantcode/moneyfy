@@ -33,33 +33,31 @@ export class TransactionsService {
   }
 
   async getSummary(userId: string) {
-  const transactions = await this.prisma.transaction.findMany({
-    where: { userId },
-  });
+    const transactions = await this.prisma.transaction.findMany({
+      where: { userId },
+    });
 
-  const totalIncome = transactions
-    .filter((transaction) => transaction.type === 'INCOME')
-    .reduce((sum, transaction) => sum + transaction.amount, 0);
+    const totalIncome = transactions
+      .filter((transaction) => transaction.type === 'INCOME')
+      .reduce((sum, transaction) => sum + transaction.amount, 0);
 
-  const totalExpenses = transactions
-    .filter((transaction) => transaction.type === 'EXPENSE')
-    .reduce((sum, transaction) => sum + transaction.amount, 0);
+    const totalExpenses = transactions
+      .filter((transaction) => transaction.type === 'EXPENSE')
+      .reduce((sum, transaction) => sum + transaction.amount, 0);
 
-  const balance = totalIncome - totalExpenses;
+    const balance = totalIncome - totalExpenses;
 
-  const savingsRate =
-    totalIncome > 0
-      ? Number(((balance / totalIncome) * 100).toFixed(2))
-      : 0;
+    const savingsRate =
+      totalIncome > 0 ? Number(((balance / totalIncome) * 100).toFixed(2)) : 0;
 
-  return {
-    totalIncome,
-    totalExpenses,
-    balance,
-    transactionCount: transactions.length,
-    savingsRate,
-  };
-}
+    return {
+      totalIncome,
+      totalExpenses,
+      balance,
+      transactionCount: transactions.length,
+      savingsRate,
+    };
+  }
 
   async findOne(userId: string, transactionId: string) {
     const transaction = await this.prisma.transaction.findUnique({
@@ -101,5 +99,77 @@ export class TransactionsService {
     return this.prisma.transaction.delete({
       where: { id: transactionId },
     });
+  }
+
+  async getRecent(userId: string) {
+    return this.prisma.transaction.findMany({
+      where: { userId },
+      orderBy: { date: 'desc' },
+      take: 5,
+    });
+  }
+
+  async getMonthlyAnalytics(userId: string) {
+    const transactions = await this.prisma.transaction.findMany({
+      where: { userId },
+      orderBy: { date: 'asc' },
+    });
+
+    const monthlyMap = new Map<
+      string,
+      { month: string; income: number; expenses: number; balance: number }
+    >();
+
+    transactions.forEach((transaction) => {
+      const date = new Date(transaction.date);
+      const month = date.toLocaleString('default', {
+        month: 'short',
+        year: 'numeric',
+      });
+
+      if (!monthlyMap.has(month)) {
+        monthlyMap.set(month, {
+          month,
+          income: 0,
+          expenses: 0,
+          balance: 0,
+        });
+      }
+
+      const current = monthlyMap.get(month)!;
+
+      if (transaction.type === 'INCOME') {
+        current.income += transaction.amount;
+      }
+
+      if (transaction.type === 'EXPENSE') {
+        current.expenses += transaction.amount;
+      }
+
+      current.balance = current.income - current.expenses;
+    });
+
+    return Array.from(monthlyMap.values());
+  }
+
+  async getCategoryBreakdown(userId: string) {
+    const expenses = await this.prisma.transaction.findMany({
+      where: {
+        userId,
+        type: 'EXPENSE',
+      },
+    });
+
+    const categoryMap = new Map<string, number>();
+
+    expenses.forEach((expense) => {
+      const currentAmount = categoryMap.get(expense.category) || 0;
+      categoryMap.set(expense.category, currentAmount + expense.amount);
+    });
+
+    return Array.from(categoryMap.entries()).map(([category, amount]) => ({
+      category,
+      amount,
+    }));
   }
 }

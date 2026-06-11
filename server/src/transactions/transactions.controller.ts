@@ -39,6 +39,25 @@ getSummary(
   return this.transactionsService.getSummary(user.userId);
 }
 
+@Get('recent')
+getRecent(@CurrentUser() user: { userId: string; email: string }) {
+  return this.transactionsService.getRecent(user.userId);
+}
+
+@Get('monthly')
+getMonthlyAnalytics(
+  @CurrentUser() user: { userId: string; email: string },
+) {
+  return this.transactionsService.getMonthlyAnalytics(user.userId);
+}
+
+@Get('category-breakdown')
+getCategoryBreakdown(
+  @CurrentUser() user: { userId: string; email: string },
+) {
+  return this.transactionsService.getCategoryBreakdown(user.userId);
+}
+
   @Get(':id')
   findOne(
     @CurrentUser() user: { userId: string; email: string },
