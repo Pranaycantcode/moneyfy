@@ -32,6 +32,13 @@ export class TransactionsController {
     return this.transactionsService.findAll(user.userId);
   }
 
+  @Get('summary')
+getSummary(
+  @CurrentUser() user: { userId: string; email: string },
+) {
+  return this.transactionsService.getSummary(user.userId);
+}
+
   @Get(':id')
   findOne(
     @CurrentUser() user: { userId: string; email: string },

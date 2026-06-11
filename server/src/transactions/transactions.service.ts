@@ -32,6 +32,35 @@ export class TransactionsService {
     });
   }
 
+  async getSummary(userId: string) {
+  const transactions = await this.prisma.transaction.findMany({
+    where: { userId },
+  });
+
+  const totalIncome = transactions
+    .filter((transaction) => transaction.type === 'INCOME')
+    .reduce((sum, transaction) => sum + transaction.amount, 0);
+
+  const totalExpenses = transactions
+    .filter((transaction) => transaction.type === 'EXPENSE')
+    .reduce((sum, transaction) => sum + transaction.amount, 0);
+
+  const balance = totalIncome - totalExpenses;
+
+  const savingsRate =
+    totalIncome > 0
+      ? Number(((balance / totalIncome) * 100).toFixed(2))
+      : 0;
+
+  return {
+    totalIncome,
+    totalExpenses,
+    balance,
+    transactionCount: transactions.length,
+    savingsRate,
+  };
+}
+
   async findOne(userId: string, transactionId: string) {
     const transaction = await this.prisma.transaction.findUnique({
       where: { id: transactionId },
