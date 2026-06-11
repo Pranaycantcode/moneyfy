@@ -4,6 +4,9 @@ import { useEffect, useState } from "react";
 import AnalyticsGrid from "@/components/dashboard/analyticsGrid";
 import DashboardLayout from "@/components/layout/dashboardLayout";
 import RecentTransactions from "@/components/transactions/recentTransactions";
+import GoalProgressList from "@/components/goals/goalProgressList";
+import { getGoalProgress } from "@/services/goalService";
+import { GoalProgress } from "@/types/goal";
 import {
   CategoryBreakdown,
   MonthlyAnalytics,
@@ -21,32 +24,37 @@ export default function Home() {
   const [summary, setSummary] = useState<TransactionSummary | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [monthlyAnalytics, setMonthlyAnalytics] = useState<MonthlyAnalytics[]>(
-    []
+    [],
   );
   const [categoryBreakdown, setCategoryBreakdown] = useState<
     CategoryBreakdown[]
   >([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [goals, setGoals] = useState<GoalProgress[]>([]);
 
   useEffect(() => {
     const loadDashboardData = async () => {
       try {
-        const [summaryData, recentData, monthlyData, categoryData] =
+        const [summaryData, recentData, monthlyData, categoryData, goalsData] =
           await Promise.all([
             getTransactionSummary(),
             getRecentTransactions(),
             getMonthlyAnalytics(),
             getCategoryBreakdown(),
+            getGoalProgress(),
           ]);
 
         setSummary(summaryData);
         setTransactions(recentData);
         setMonthlyAnalytics(monthlyData);
         setCategoryBreakdown(categoryData);
+        setGoals(goalsData);
       } catch (err) {
         console.error(err);
-        setError("Unable to load dashboard data. Please check your login token.");
+        setError(
+          "Unable to load dashboard data. Please check your login token.",
+        );
       } finally {
         setLoading(false);
       }
@@ -117,6 +125,7 @@ export default function Home() {
             ))}
           </div>
         </section>
+        <GoalProgressList goals={goals} />
       </div>
     </DashboardLayout>
   );
