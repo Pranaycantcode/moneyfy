@@ -16,6 +16,10 @@ import { createGoal } from "@/services/goalService";
 import MonthlyCashflowChart from "@/components/dashboard/monthlyCashflowChart";
 import CategoryBreakdownChart from "@/components/dashboard/categoryBreakdownChart";
 import NetWorthSummary from "@/components/netWorth/netWorthSummary";
+import NetWorthList from "@/components/netWorth/netWorthList";
+import AddNetWorthItemForm from "@/components/netWorth/addNetWorthItemForm";
+import { createNetWorthItem } from "@/services/netWorthService";
+import { CreateNetWorthItemInput } from "@/types/netWorth";
 import {
   getNetWorthItems,
   getNetWorthSummary,
@@ -104,6 +108,11 @@ export default function Home() {
     await loadDashboardData();
   };
 
+  const handleAddNetWorthItem = async (itemData: CreateNetWorthItemInput) => {
+    await createNetWorthItem(itemData);
+    await loadDashboardData();
+  };
+
   useEffect(() => {
     loadDashboardData();
   }, []);
@@ -135,6 +144,10 @@ export default function Home() {
 
         <AddTransactionForm onAddTransaction={handleAddTransaction} />
         <AddGoalForm onAddGoal={handleAddGoal} />
+
+        <AddNetWorthItemForm onAddItem={handleAddNetWorthItem} />
+
+        <NetWorthList items={netWorthItems} />
 
         <div className="grid gap-6 xl:grid-cols-3">
           <div className="xl:col-span-2">
