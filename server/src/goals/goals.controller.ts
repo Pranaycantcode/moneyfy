@@ -32,6 +32,11 @@ export class GoalsController {
     return this.goalsService.findAll(user.userId);
   }
 
+  @Get('progress')
+getProgress(@CurrentUser() user: { userId: string; email: string }) {
+  return this.goalsService.getProgress(user.userId);
+}
+
   @Get(':id')
   findOne(
     @CurrentUser() user: { userId: string; email: string },
