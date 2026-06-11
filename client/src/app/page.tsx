@@ -7,6 +7,9 @@ import RecentTransactions from "@/components/transactions/recentTransactions";
 import GoalProgressList from "@/components/goals/goalProgressList";
 import { getGoalProgress } from "@/services/goalService";
 import { GoalProgress } from "@/types/goal";
+import AddTransactionForm from "@/components/transactions/addTransactionForm";
+import { CreateTransactionInput } from "@/types/transaction";
+import { createTransaction } from "@/services/transactionService";
 import {
   CategoryBreakdown,
   MonthlyAnalytics,
@@ -33,35 +36,45 @@ export default function Home() {
   const [error, setError] = useState("");
   const [goals, setGoals] = useState<GoalProgress[]>([]);
 
-  useEffect(() => {
-    const loadDashboardData = async () => {
-      try {
-        const [summaryData, recentData, monthlyData, categoryData, goalsData] =
-          await Promise.all([
-            getTransactionSummary(),
-            getRecentTransactions(),
-            getMonthlyAnalytics(),
-            getCategoryBreakdown(),
-            getGoalProgress(),
-          ]);
 
-        setSummary(summaryData);
-        setTransactions(recentData);
-        setMonthlyAnalytics(monthlyData);
-        setCategoryBreakdown(categoryData);
-        setGoals(goalsData);
-      } catch (err) {
-        console.error(err);
-        setError(
-          "Unable to load dashboard data. Please check your login token.",
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
+  const loadDashboardData = async () => {
+  try {
+    setLoading(true);
 
-    loadDashboardData();
-  }, []);
+    const [summaryData, recentData, monthlyData, categoryData, goalsData] =
+      await Promise.all([
+        getTransactionSummary(),
+        getRecentTransactions(),
+        getMonthlyAnalytics(),
+        getCategoryBreakdown(),
+        getGoalProgress(),
+      ]);
+
+    setSummary(summaryData);
+    setTransactions(recentData);
+    setMonthlyAnalytics(monthlyData);
+    setCategoryBreakdown(categoryData);
+    setGoals(goalsData);
+    setError("");
+  } catch (err) {
+    console.error(err);
+    setError("Unable to load dashboard data. Please check your login token.");
+  } finally {
+    setLoading(false);
+  }
+};
+
+const handleAddTransaction = async (
+  transactionData: CreateTransactionInput,
+) => {
+  await createTransaction(transactionData);
+  await loadDashboardData();
+};
+
+useEffect(() => {
+  loadDashboardData();
+}, []);
+
 
   if (loading) {
     return (
@@ -85,6 +98,8 @@ export default function Home() {
     <DashboardLayout>
       <div className="space-y-6">
         <AnalyticsGrid summary={summary} />
+
+        <AddTransactionForm onAddTransaction={handleAddTransaction} />
 
         <div className="grid gap-6 xl:grid-cols-3">
           <div className="xl:col-span-2">

@@ -4,6 +4,7 @@ import {
   TransactionSummary,
 } from "@/types/analytics";
 import { Transaction } from "@/types/transaction";
+import { CreateTransactionInput } from "@/types/transaction";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -59,6 +60,22 @@ export const getCategoryBreakdown = async (): Promise<CategoryBreakdown[]> => {
 
   if (!response.ok) {
     throw new Error("Failed to fetch category breakdown");
+  }
+
+  return response.json();
+};
+
+export const createTransaction = async (
+  transactionData: CreateTransactionInput
+): Promise<Transaction> => {
+  const response = await fetch(`${API_URL}/transactions`, {
+    method: "POST",
+    headers: getAuthHeaders(),
+    body: JSON.stringify(transactionData),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to create transaction");
   }
 
   return response.json();
