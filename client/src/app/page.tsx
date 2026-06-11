@@ -15,6 +15,15 @@ import { CreateGoalInput } from "@/types/goal";
 import { createGoal } from "@/services/goalService";
 import MonthlyCashflowChart from "@/components/dashboard/monthlyCashflowChart";
 import CategoryBreakdownChart from "@/components/dashboard/categoryBreakdownChart";
+import NetWorthSummary from "@/components/netWorth/netWorthSummary";
+import {
+  getNetWorthItems,
+  getNetWorthSummary,
+} from "@/services/netWorthService";
+import {
+  NetWorthItem,
+  NetWorthSummary as NetWorthSummaryType,
+} from "@/types/netWorth";
 import {
   CategoryBreakdown,
   MonthlyAnalytics,
@@ -40,25 +49,40 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [goals, setGoals] = useState<GoalProgress[]>([]);
+  const [netWorthSummary, setNetWorthSummary] =
+    useState<NetWorthSummaryType | null>(null);
+
+  const [netWorthItems, setNetWorthItems] = useState<NetWorthItem[]>([]);
 
   const loadDashboardData = async () => {
     try {
       setLoading(true);
 
-      const [summaryData, recentData, monthlyData, categoryData, goalsData] =
-        await Promise.all([
-          getTransactionSummary(),
-          getRecentTransactions(),
-          getMonthlyAnalytics(),
-          getCategoryBreakdown(),
-          getGoalProgress(),
-        ]);
+      const [
+        summaryData,
+        recentData,
+        monthlyData,
+        categoryData,
+        goalsData,
+        netWorthSummaryData,
+        netWorthItemsData,
+      ] = await Promise.all([
+        getTransactionSummary(),
+        getRecentTransactions(),
+        getMonthlyAnalytics(),
+        getCategoryBreakdown(),
+        getGoalProgress(),
+        getNetWorthSummary(),
+        getNetWorthItems(),
+      ]);
 
       setSummary(summaryData);
       setTransactions(recentData);
       setMonthlyAnalytics(monthlyData);
       setCategoryBreakdown(categoryData);
       setGoals(goalsData);
+      setNetWorthSummary(netWorthSummaryData);
+      setNetWorthItems(netWorthItemsData);
       setError("");
     } catch (err) {
       console.error(err);
@@ -92,7 +116,7 @@ export default function Home() {
     );
   }
 
-  if (error || !summary) {
+  if (error || !summary || !netWorthSummary) {
     return (
       <DashboardLayout>
         <div className="rounded-2xl border border-red-500/20 bg-red-500/10 p-5 text-red-200">
@@ -106,6 +130,8 @@ export default function Home() {
     <DashboardLayout>
       <div className="space-y-6">
         <AnalyticsGrid summary={summary} />
+
+        <NetWorthSummary summary={netWorthSummary} />
 
         <AddTransactionForm onAddTransaction={handleAddTransaction} />
         <AddGoalForm onAddGoal={handleAddGoal} />
