@@ -7,9 +7,10 @@ import { AuthModule } from './auth/auth.module';
 import { TransactionsModule } from './transactions/transactions.module';
 import { GoalsModule } from './goals/goals.module';
 import { NetWorthModule } from './net-worth/net-worth.module';
+import { RecurringTransactionsModule } from './recurring-transactions/recurring-transactions.module';
 
 @Module({
-  imports: [PrismaModule, UsersModule, AuthModule, TransactionsModule, GoalsModule, NetWorthModule],
+  imports: [PrismaModule, UsersModule, AuthModule, TransactionsModule, GoalsModule, NetWorthModule, RecurringTransactionsModule],
   controllers: [AppController],
   providers: [AppService],
 })
