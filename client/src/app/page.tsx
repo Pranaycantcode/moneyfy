@@ -20,6 +20,8 @@ import NetWorthList from "@/components/netWorth/netWorthList";
 import AddNetWorthItemForm from "@/components/netWorth/addNetWorthItemForm";
 import { createNetWorthItem } from "@/services/netWorthService";
 import { CreateNetWorthItemInput } from "@/types/netWorth";
+import { useRouter } from "next/navigation";
+import { getAuthToken } from "@/services/authService";
 import {
   getNetWorthItems,
   getNetWorthSummary,
@@ -55,6 +57,8 @@ export default function Home() {
   const [goals, setGoals] = useState<GoalProgress[]>([]);
   const [netWorthSummary, setNetWorthSummary] =
     useState<NetWorthSummaryType | null>(null);
+
+  const router = useRouter();
 
   const [netWorthItems, setNetWorthItems] = useState<NetWorthItem[]>([]);
 
@@ -114,6 +118,13 @@ export default function Home() {
   };
 
   useEffect(() => {
+    const token = getAuthToken();
+
+    if (!token) {
+      router.push("/auth");
+      return;
+    }
+
     loadDashboardData();
   }, []);
 
