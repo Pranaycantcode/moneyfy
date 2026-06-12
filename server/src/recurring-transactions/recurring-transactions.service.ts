@@ -6,10 +6,16 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateRecurringTransactionDto } from './dto/create-recurring-transaction.dto';
 import { UpdateRecurringTransactionDto } from './dto/update-recurring-transaction.dto';
+import { InjectQueue } from '@nestjs/bullmq';
+import { Queue } from 'bullmq';
 
 @Injectable()
 export class RecurringTransactionsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+  private readonly prisma: PrismaService,
+  @InjectQueue('recurring-transactions')
+  private readonly recurringQueue: Queue,
+) {}
 
   async create(userId: string, createDto: CreateRecurringTransactionDto) {
     return this.prisma.recurringTransaction.create({
@@ -95,4 +101,16 @@ export class RecurringTransactionsService {
       },
     });
   }
+
+  async addTestJob(userId: string) {
+  const job = await this.recurringQueue.add('test-recurring-job', {
+    userId,
+    message: 'Recurring transaction queue is working',
+  });
+
+  return {
+    message: 'Job added successfully',
+    jobId: job.id,
+  };
+}
 }

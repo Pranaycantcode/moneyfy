@@ -29,6 +29,11 @@ export class RecurringTransactionsController {
     return this.recurringTransactionsService.create(user.userId, createDto);
   }
 
+  @Post('test-job')
+  addTestJob(@CurrentUser() user: { userId: string; email: string }) {
+    return this.recurringTransactionsService.addTestJob(user.userId);
+  }
+
   @Get()
   findAll(@CurrentUser() user: { userId: string; email: string }) {
     return this.recurringTransactionsService.findAll(user.userId);
@@ -48,11 +53,7 @@ export class RecurringTransactionsController {
     @Param('id') id: string,
     @Body() updateDto: UpdateRecurringTransactionDto,
   ) {
-    return this.recurringTransactionsService.update(
-      user.userId,
-      id,
-      updateDto,
-    );
+    return this.recurringTransactionsService.update(user.userId, id, updateDto);
   }
 
   @Patch(':id/toggle')
