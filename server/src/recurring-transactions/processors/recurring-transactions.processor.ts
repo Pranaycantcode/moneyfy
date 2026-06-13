@@ -13,8 +13,7 @@ export class RecurringTransactionsProcessor extends WorkerHost {
       return;
     }
 
-    const recurringTransactionId =
-      job.data.recurringTransactionId;
+    const recurringTransactionId = job.data.recurringTransactionId;
 
     const recurringTransaction =
       await this.prisma.recurringTransaction.findUnique({
@@ -23,10 +22,7 @@ export class RecurringTransactionsProcessor extends WorkerHost {
         },
       });
 
-    if (
-      !recurringTransaction ||
-      !recurringTransaction.isActive
-    ) {
+    if (!recurringTransaction || !recurringTransaction.isActive) {
       return;
     }
 
@@ -39,6 +35,34 @@ export class RecurringTransactionsProcessor extends WorkerHost {
         date: new Date(),
         note: recurringTransaction.note,
         userId: recurringTransaction.userId,
+      },
+    });
+
+    const nextRunDate = new Date(recurringTransaction.nextRunDate);
+
+    switch (recurringTransaction.frequency) {
+      case 'DAILY':
+        nextRunDate.setDate(nextRunDate.getDate() + 1);
+        break;
+
+      case 'WEEKLY':
+        nextRunDate.setDate(nextRunDate.getDate() + 7);
+        break;
+
+      case 'MONTHLY':
+        nextRunDate.setMonth(nextRunDate.getMonth() + 1);
+        break;
+
+      case 'YEARLY':
+        nextRunDate.setFullYear(nextRunDate.getFullYear() + 1);
+        break;
+    }
+    await this.prisma.recurringTransaction.update({
+      where: {
+        id: recurringTransaction.id,
+      },
+      data: {
+        nextRunDate,
       },
     });
 

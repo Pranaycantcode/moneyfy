@@ -4,6 +4,7 @@ import { RecurringTransactionsController } from './recurring-transactions.contro
 import { RecurringTransactionsService } from './recurring-transactions.service';
 import { BullModule } from '@nestjs/bullmq';
 import { RecurringTransactionsProcessor } from './processors/recurring-transactions.processor';
+import { RecurringTransactionsScheduler } from './scheduler/recurring-transactions.scheduler';
 
 @Module({
   imports: [
@@ -13,6 +14,6 @@ import { RecurringTransactionsProcessor } from './processors/recurring-transacti
   }),
 ],
   controllers: [RecurringTransactionsController],
-  providers: [RecurringTransactionsService, RecurringTransactionsProcessor],
+  providers: [RecurringTransactionsService, RecurringTransactionsProcessor, RecurringTransactionsScheduler],
 })
 export class RecurringTransactionsModule {}

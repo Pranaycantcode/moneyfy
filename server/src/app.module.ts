@@ -9,9 +9,11 @@ import { GoalsModule } from './goals/goals.module';
 import { NetWorthModule } from './net-worth/net-worth.module';
 import { RecurringTransactionsModule } from './recurring-transactions/recurring-transactions.module';
 import { BullModule } from '@nestjs/bullmq';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
+    ScheduleModule.forRoot(),
     BullModule.forRoot({
       connection: {
         host: process.env.REDIS_HOST || 'localhost',
