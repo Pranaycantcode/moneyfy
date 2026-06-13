@@ -26,6 +26,12 @@ import AddRecurringTransactionForm from "@/components/recurringTransactions/addR
 import RecurringTransactionsList from "@/components/recurringTransactions/recurringTransactionsList";
 import TransactionImportForm from "@/components/transactions/transactionImportForm";
 import { importTransactionsFromCsv } from "@/services/transactionService";
+import AddBudgetForm from "@/components/budgets/addBudgetForm";
+import BudgetProgressList from "@/components/budgets/budgetProgressList";
+
+import { createBudget, getBudgetSummary } from "@/services/budgetService";
+
+import { BudgetSummary, CreateBudgetInput } from "@/types/budget";
 import {
   createRecurringTransaction,
   getRecurringTransactions,
@@ -78,6 +84,12 @@ export default function Home() {
   >([]);
 
   const [netWorthItems, setNetWorthItems] = useState<NetWorthItem[]>([]);
+  const [budgetSummary, setBudgetSummary] = useState<BudgetSummary[]>([]);
+
+  const currentDate = new Date();
+
+  const currentMonth = currentDate.getMonth() + 1;
+  const currentYear = currentDate.getFullYear();
 
   const loadDashboardData = async () => {
     try {
@@ -92,6 +104,7 @@ export default function Home() {
         netWorthSummaryData,
         netWorthItemsData,
         recurringTransactionsData,
+        budgetSummaryData,
       ] = await Promise.all([
         getTransactionSummary(),
         getRecentTransactions(),
@@ -101,6 +114,7 @@ export default function Home() {
         getNetWorthSummary(),
         getNetWorthItems(),
         getRecurringTransactions(),
+        getBudgetSummary(currentMonth, currentYear),
       ]);
 
       setSummary(summaryData);
@@ -111,6 +125,7 @@ export default function Home() {
       setNetWorthSummary(netWorthSummaryData);
       setNetWorthItems(netWorthItemsData);
       setRecurringTransactions(recurringTransactionsData);
+      setBudgetSummary(budgetSummaryData);
       setError("");
     } catch (err) {
       console.error(err);
@@ -128,9 +143,9 @@ export default function Home() {
   };
 
   const handleImportTransactions = async (file: File) => {
-  await importTransactionsFromCsv(file);
-  await loadDashboardData();
-};
+    await importTransactionsFromCsv(file);
+    await loadDashboardData();
+  };
 
   const handleAddGoal = async (goalData: CreateGoalInput) => {
     await createGoal(goalData);
@@ -151,6 +166,12 @@ export default function Home() {
 
   const handleToggleRecurringTransaction = async (id: string) => {
     await toggleRecurringTransaction(id);
+    await loadDashboardData();
+  };
+
+  const handleAddBudget = async (budgetData: CreateBudgetInput) => {
+    await createBudget(budgetData);
+
     await loadDashboardData();
   };
 
@@ -191,7 +212,9 @@ export default function Home() {
         <NetWorthSummary summary={netWorthSummary} />
 
         <AddTransactionForm onAddTransaction={handleAddTransaction} />
-        <TransactionImportForm onImportTransactions={handleImportTransactions} />
+        <TransactionImportForm
+          onImportTransactions={handleImportTransactions}
+        />
         <AddGoalForm onAddGoal={handleAddGoal} />
 
         <AddNetWorthItemForm onAddItem={handleAddNetWorthItem} />
@@ -200,7 +223,11 @@ export default function Home() {
           onAddRecurringTransaction={handleAddRecurringTransaction}
         />
 
+        <AddBudgetForm onAddBudget={handleAddBudget} />
+
         <NetWorthList items={netWorthItems} />
+
+        <BudgetProgressList budgets={budgetSummary} />
 
         <RecurringTransactionsList
           recurringTransactions={recurringTransactions}
