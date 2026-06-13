@@ -42,7 +42,7 @@ export default function AuthPage() {
 
       saveAuthToken(response.token);
 
-      router.push("/");
+      router.push("/dashboard");
     } catch (err) {
       console.error(err);
       setError(

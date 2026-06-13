@@ -103,3 +103,15 @@ export const importTransactionsFromCsv = async (
 
   return response.json();
 };
+
+export const getAllTransactions = async (): Promise<Transaction[]> => {
+  const response = await fetch(`${API_URL}/transactions`, {
+    headers: getAuthHeaders(),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch transactions");
+  }
+
+  return response.json();
+};
