@@ -22,6 +22,17 @@ import { createNetWorthItem } from "@/services/netWorthService";
 import { CreateNetWorthItemInput } from "@/types/netWorth";
 import { useRouter } from "next/navigation";
 import { getAuthToken } from "@/services/authService";
+import AddRecurringTransactionForm from "@/components/recurringTransactions/addRecurringTransactionForm";
+import RecurringTransactionsList from "@/components/recurringTransactions/recurringTransactionsList";
+import {
+  createRecurringTransaction,
+  getRecurringTransactions,
+  toggleRecurringTransaction,
+} from "@/services/recurringTransactionService";
+import {
+  CreateRecurringTransactionInput,
+  RecurringTransaction,
+} from "@/types/recurringTransaction";
 import {
   getNetWorthItems,
   getNetWorthSummary,
@@ -60,6 +71,10 @@ export default function Home() {
 
   const router = useRouter();
 
+  const [recurringTransactions, setRecurringTransactions] = useState<
+    RecurringTransaction[]
+  >([]);
+
   const [netWorthItems, setNetWorthItems] = useState<NetWorthItem[]>([]);
 
   const loadDashboardData = async () => {
@@ -74,6 +89,7 @@ export default function Home() {
         goalsData,
         netWorthSummaryData,
         netWorthItemsData,
+        recurringTransactionsData,
       ] = await Promise.all([
         getTransactionSummary(),
         getRecentTransactions(),
@@ -82,6 +98,7 @@ export default function Home() {
         getGoalProgress(),
         getNetWorthSummary(),
         getNetWorthItems(),
+        getRecurringTransactions(),
       ]);
 
       setSummary(summaryData);
@@ -91,6 +108,7 @@ export default function Home() {
       setGoals(goalsData);
       setNetWorthSummary(netWorthSummaryData);
       setNetWorthItems(netWorthItemsData);
+      setRecurringTransactions(recurringTransactionsData);
       setError("");
     } catch (err) {
       console.error(err);
@@ -114,6 +132,18 @@ export default function Home() {
 
   const handleAddNetWorthItem = async (itemData: CreateNetWorthItemInput) => {
     await createNetWorthItem(itemData);
+    await loadDashboardData();
+  };
+
+  const handleAddRecurringTransaction = async (
+    recurringData: CreateRecurringTransactionInput,
+  ) => {
+    await createRecurringTransaction(recurringData);
+    await loadDashboardData();
+  };
+
+  const handleToggleRecurringTransaction = async (id: string) => {
+    await toggleRecurringTransaction(id);
     await loadDashboardData();
   };
 
@@ -158,7 +188,16 @@ export default function Home() {
 
         <AddNetWorthItemForm onAddItem={handleAddNetWorthItem} />
 
+        <AddRecurringTransactionForm
+          onAddRecurringTransaction={handleAddRecurringTransaction}
+        />
+
         <NetWorthList items={netWorthItems} />
+
+        <RecurringTransactionsList
+          recurringTransactions={recurringTransactions}
+          onToggleRecurringTransaction={handleToggleRecurringTransaction}
+        />
 
         <div className="grid gap-6 xl:grid-cols-3">
           <div className="xl:col-span-2">
