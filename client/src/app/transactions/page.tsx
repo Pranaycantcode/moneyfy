@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import DashboardLayout from "@/components/layout/dashboardLayout";
-import RecentTransactions from "@/components/transactions/recentTransactions";
+import TransactionsTable from "@/components/transactions/transactionsTable";
 import AddTransactionForm from "@/components/transactions/addTransactionForm";
 import TransactionImportForm from "@/components/transactions/transactionImportForm";
 import {
@@ -64,7 +64,7 @@ export default function TransactionsPage() {
         {loading ? (
           <p className="text-slate-400">Loading transactions...</p>
         ) : (
-          <RecentTransactions transactions={transactions} />
+          <TransactionsTable transactions={transactions} />
         )}
       </div>
     </DashboardLayout>
