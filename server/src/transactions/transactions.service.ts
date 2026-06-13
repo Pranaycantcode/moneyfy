@@ -76,30 +76,48 @@ export class TransactionsService {
   }
 
   async update(
-    userId: string,
-    transactionId: string,
-    updateTransactionDto: UpdateTransactionDto,
-  ) {
-    await this.findOne(userId, transactionId);
+  userId: string,
+  transactionId: string,
+  updateTransactionDto: UpdateTransactionDto,
+) {
+  const transaction = await this.prisma.transaction.findUnique({
+    where: {
+      id: transactionId,
+    },
+  });
 
-    return this.prisma.transaction.update({
-      where: { id: transactionId },
-      data: {
-        ...updateTransactionDto,
-        date: updateTransactionDto.date
-          ? new Date(updateTransactionDto.date)
-          : undefined,
-      },
-    });
+  if (!transaction || transaction.userId !== userId) {
+    throw new NotFoundException('Transaction not found');
   }
 
-  async remove(userId: string, transactionId: string) {
-    await this.findOne(userId, transactionId);
+  return this.prisma.transaction.update({
+    where: {
+      id: transactionId,
+    },
+    data: updateTransactionDto,
+  });
+}
 
-    return this.prisma.transaction.delete({
-      where: { id: transactionId },
-    });
+  async remove(
+  userId: string,
+  transactionId: string,
+) {
+  const transaction = await this.prisma.transaction.findUnique({
+    where: {
+      id: transactionId,
+    },
+  });
+
+  if (!transaction || transaction.userId !== userId) {
+    throw new NotFoundException('Transaction not found');
   }
+
+  return this.prisma.transaction.delete({
+    where: {
+      id: transactionId,
+    },
+  });
+}
 
   async getRecent(userId: string) {
     return this.prisma.transaction.findMany({

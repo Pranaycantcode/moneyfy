@@ -1,10 +1,11 @@
 import { TransactionType } from '@prisma/client';
 
+
 export class UpdateTransactionDto {
   title?: string;
   amount?: number;
-  type?: TransactionType;
+  type?: 'INCOME' | 'EXPENSE';
   category?: string;
-  date?: string;
   note?: string;
+  date?: Date;
 }
