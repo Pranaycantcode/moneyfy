@@ -105,7 +105,7 @@ export class TransactionsService {
     return this.prisma.transaction.findMany({
       where: { userId },
       orderBy: { date: 'desc' },
-      take: 5,
+      take: 10,
     });
   }
 
