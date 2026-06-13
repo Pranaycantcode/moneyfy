@@ -80,3 +80,26 @@ export const createTransaction = async (
 
   return response.json();
 };
+
+export const importTransactionsFromCsv = async (
+  file: File,
+): Promise<{ importedCount: number }> => {
+  const token = localStorage.getItem("moneyfy_token");
+
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const response = await fetch(`${API_URL}/transactions/import`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: formData,
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to import transactions");
+  }
+
+  return response.json();
+};

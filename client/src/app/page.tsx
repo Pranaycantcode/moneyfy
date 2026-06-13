@@ -24,6 +24,8 @@ import { useRouter } from "next/navigation";
 import { getAuthToken } from "@/services/authService";
 import AddRecurringTransactionForm from "@/components/recurringTransactions/addRecurringTransactionForm";
 import RecurringTransactionsList from "@/components/recurringTransactions/recurringTransactionsList";
+import TransactionImportForm from "@/components/transactions/transactionImportForm";
+import { importTransactionsFromCsv } from "@/services/transactionService";
 import {
   createRecurringTransaction,
   getRecurringTransactions,
@@ -125,6 +127,11 @@ export default function Home() {
     await loadDashboardData();
   };
 
+  const handleImportTransactions = async (file: File) => {
+  await importTransactionsFromCsv(file);
+  await loadDashboardData();
+};
+
   const handleAddGoal = async (goalData: CreateGoalInput) => {
     await createGoal(goalData);
     await loadDashboardData();
@@ -184,6 +191,7 @@ export default function Home() {
         <NetWorthSummary summary={netWorthSummary} />
 
         <AddTransactionForm onAddTransaction={handleAddTransaction} />
+        <TransactionImportForm onImportTransactions={handleImportTransactions} />
         <AddGoalForm onAddGoal={handleAddGoal} />
 
         <AddNetWorthItemForm onAddItem={handleAddNetWorthItem} />
