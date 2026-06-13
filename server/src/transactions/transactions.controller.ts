@@ -13,11 +13,21 @@ import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
 import { TransactionsService } from './transactions.service';
+import {
+  FileInterceptor,
+} from '@nestjs/platform-express';
+
+import {
+  UploadedFile,
+  UseInterceptors,
+} from '@nestjs/common';
+
+import { TransactionImportService } from './import/transaction-import.service';
 
 @Controller('transactions')
 @UseGuards(JwtAuthGuard)
 export class TransactionsController {
-  constructor(private readonly transactionsService: TransactionsService) {}
+  constructor(private readonly transactionsService: TransactionsService, private readonly transactionImportService: TransactionImportService) {}
 
   @Post()
   create(
@@ -26,6 +36,21 @@ export class TransactionsController {
   ) {
     return this.transactionsService.create(user.userId, createTransactionDto);
   }
+
+  @Post('import')
+@UseInterceptors(FileInterceptor('file'))
+importTransactions(
+  @CurrentUser()
+  user: { userId: string; email: string },
+
+  @UploadedFile()
+  file: any,
+) {
+  return this.transactionImportService.importTransactions(
+    user.userId,
+    file.buffer,
+  );
+}
 
   @Get()
   findAll(@CurrentUser() user: { userId: string; email: string }) {
