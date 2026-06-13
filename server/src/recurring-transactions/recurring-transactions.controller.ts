@@ -34,6 +34,20 @@ export class RecurringTransactionsController {
     return this.recurringTransactionsService.addTestJob(user.userId);
   }
 
+  @Post(':id/process')
+  processRecurringTransaction(
+    @CurrentUser()
+    user: { userId: string; email: string },
+
+    @Param('id')
+    id: string,
+  ) {
+    return this.recurringTransactionsService.queueRecurringTransaction(
+      user.userId,
+      id,
+    );
+  }
+
   @Get()
   findAll(@CurrentUser() user: { userId: string; email: string }) {
     return this.recurringTransactionsService.findAll(user.userId);

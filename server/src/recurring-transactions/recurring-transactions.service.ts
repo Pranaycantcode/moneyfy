@@ -12,10 +12,10 @@ import { Queue } from 'bullmq';
 @Injectable()
 export class RecurringTransactionsService {
   constructor(
-  private readonly prisma: PrismaService,
-  @InjectQueue('recurring-transactions')
-  private readonly recurringQueue: Queue,
-) {}
+    private readonly prisma: PrismaService,
+    @InjectQueue('recurring-transactions')
+    private readonly recurringQueue: Queue,
+  ) {}
 
   async create(userId: string, createDto: CreateRecurringTransactionDto) {
     return this.prisma.recurringTransaction.create({
@@ -103,14 +103,33 @@ export class RecurringTransactionsService {
   }
 
   async addTestJob(userId: string) {
-  const job = await this.recurringQueue.add('test-recurring-job', {
-    userId,
-    message: 'Recurring transaction queue is working',
-  });
+    const job = await this.recurringQueue.add('test-recurring-job', {
+      userId,
+      message: 'Recurring transaction queue is working',
+    });
 
-  return {
-    message: 'Job added successfully',
-    jobId: job.id,
-  };
-}
+    return {
+      message: 'Job added successfully',
+      jobId: job.id,
+    };
+  }
+
+  async queueRecurringTransaction(
+    userId: string,
+    recurringTransactionId: string,
+  ) {
+    const recurringTransaction = await this.findOne(
+      userId,
+      recurringTransactionId,
+    );
+
+    const job = await this.recurringQueue.add('process-recurring-transaction', {
+      recurringTransactionId: recurringTransaction.id,
+    });
+
+    return {
+      message: 'Recurring transaction queued',
+      jobId: job.id,
+    };
+  }
 }
