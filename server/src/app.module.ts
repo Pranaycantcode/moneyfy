@@ -10,6 +10,7 @@ import { NetWorthModule } from './net-worth/net-worth.module';
 import { RecurringTransactionsModule } from './recurring-transactions/recurring-transactions.module';
 import { BullModule } from '@nestjs/bullmq';
 import { ScheduleModule } from '@nestjs/schedule';
+import { BudgetsModule } from './budgets/budgets.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     GoalsModule,
     NetWorthModule,
     RecurringTransactionsModule,
+    BudgetsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

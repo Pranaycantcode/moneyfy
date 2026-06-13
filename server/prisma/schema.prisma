@@ -15,6 +15,7 @@ model User {
   savingsGoals SavingsGoal[]
   netWorthItems NetWorthItem[]
   recurringTransactions RecurringTransaction[]
+  budgets Budget[]
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
 }
@@ -76,6 +77,22 @@ model RecurringTransaction {
 
   createdAt   DateTime                 @default(now())
   updatedAt   DateTime                 @updatedAt
+}
+
+model Budget {
+  id         String   @id @default(uuid())
+  category   String
+  limit      Float
+  month      Int
+  year       Int
+
+  userId     String
+  user       User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([category, month, year, userId])
 }
 
 enum RecurringFrequency {
