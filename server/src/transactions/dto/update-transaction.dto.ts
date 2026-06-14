@@ -7,5 +7,5 @@ export class UpdateTransactionDto {
   type?: 'INCOME' | 'EXPENSE';
   category?: string;
   note?: string;
-  date?: Date;
+  date?: string;
 }

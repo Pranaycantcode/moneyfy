@@ -115,3 +115,33 @@ export const getAllTransactions = async (): Promise<Transaction[]> => {
 
   return response.json();
 };
+
+export const updateTransaction = async (
+  id: string,
+  data: Partial<CreateTransactionInput>,
+): Promise<Transaction> => {
+  const response = await fetch(`${API_URL}/transactions/${id}`, {
+    method: "PATCH",
+    headers: getAuthHeaders(),
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to update transaction");
+  }
+
+  return response.json();
+};
+
+export const deleteTransaction = async (
+  id: string,
+): Promise<void> => {
+  const response = await fetch(`${API_URL}/transactions/${id}`, {
+    method: "DELETE",
+    headers: getAuthHeaders(),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to delete transaction");
+  }
+};

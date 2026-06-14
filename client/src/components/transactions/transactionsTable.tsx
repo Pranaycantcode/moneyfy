@@ -1,10 +1,15 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Transaction } from "@/types/transaction";
+import { CreateTransactionInput, Transaction } from "@/types/transaction";
 
 interface TransactionsTableProps {
   transactions: Transaction[];
+  onDeleteTransaction: (id: string) => Promise<void>;
+  onUpdateTransaction: (
+    id: string,
+    data: Partial<CreateTransactionInput>,
+  ) => Promise<void>;
 }
 
 const formatCurrency = (amount: number) => {
@@ -19,10 +24,17 @@ const formatDate = (date: string) => {
   });
 };
 
-const TransactionsTable = ({ transactions }: TransactionsTableProps) => {
+const TransactionsTable = ({
+  transactions,
+  onDeleteTransaction,
+  onUpdateTransaction,
+}: TransactionsTableProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [typeFilter, setTypeFilter] = useState("ALL");
   const [categoryFilter, setCategoryFilter] = useState("ALL");
+  const [editingId, setEditingId] = useState<string | null>(null);
+
+  const [editData, setEditData] = useState<Partial<CreateTransactionInput>>({});
 
   const categories = useMemo(() => {
     return Array.from(
@@ -45,6 +57,29 @@ const TransactionsTable = ({ transactions }: TransactionsTableProps) => {
       return matchesSearch && matchesType && matchesCategory;
     });
   }, [transactions, searchTerm, typeFilter, categoryFilter]);
+
+  const startEditing = (transaction: Transaction) => {
+    setEditingId(transaction.id);
+    setEditData({
+      title: transaction.title,
+      amount: transaction.amount,
+      type: transaction.type,
+      category: transaction.category,
+      date: transaction.date.split("T")[0],
+      note: transaction.note || "",
+    });
+  };
+
+  const cancelEditing = () => {
+    setEditingId(null);
+    setEditData({});
+  };
+
+  const saveEditing = async (id: string) => {
+    await onUpdateTransaction(id, editData);
+    setEditingId(null);
+    setEditData({});
+  };
 
   return (
     <section className="rounded-2xl border border-white/10 bg-white/5 p-5">
@@ -96,6 +131,7 @@ const TransactionsTable = ({ transactions }: TransactionsTableProps) => {
               <th className="px-4 py-3 font-medium">Type</th>
               <th className="px-4 py-3 font-medium">Date</th>
               <th className="px-4 py-3 text-right font-medium">Amount</th>
+              <th className="px-4 py-3 text-center font-medium">Actions</th>
             </tr>
           </thead>
 
@@ -105,18 +141,84 @@ const TransactionsTable = ({ transactions }: TransactionsTableProps) => {
                 key={transaction.id}
                 className="border-t border-white/10 bg-slate-950/40"
               >
-                <td className="px-4 py-3">{transaction.title}</td>
-                <td className="px-4 py-3 text-slate-400">
-                  {transaction.category}
-                </td>
                 <td className="px-4 py-3">
-                  <span className="rounded-full bg-white/10 px-3 py-1 text-xs">
-                    {transaction.type}
-                  </span>
+                  {editingId === transaction.id ? (
+                    <input
+                      value={editData.title || ""}
+                      onChange={(e) =>
+                        setEditData((prev) => ({
+                          ...prev,
+                          title: e.target.value,
+                        }))
+                      }
+                      className="w-full rounded-lg bg-slate-900 p-2 text-sm"
+                    />
+                  ) : (
+                    transaction.title
+                  )}
                 </td>
+
                 <td className="px-4 py-3 text-slate-400">
-                  {formatDate(transaction.date)}
+                  {editingId === transaction.id ? (
+                    <input
+                      value={editData.category || ""}
+                      onChange={(e) =>
+                        setEditData((prev) => ({
+                          ...prev,
+                          category: e.target.value,
+                        }))
+                      }
+                      className="w-full rounded-lg bg-slate-900 p-2 text-sm"
+                    />
+                  ) : (
+                    transaction.category
+                  )}
                 </td>
+
+                <td className="px-4 py-3">
+                  {editingId === transaction.id ? (
+                    <select
+                      value={editData.type || transaction.type}
+                      onChange={(e) =>
+                        setEditData((prev) => ({
+                          ...prev,
+                          type: e.target.value as Transaction["type"],
+                        }))
+                      }
+                      className="rounded-lg bg-slate-900 p-2 text-sm"
+                    >
+                      <option value="INCOME">INCOME</option>
+                      <option value="EXPENSE">EXPENSE</option>
+                    </select>
+                  ) : (
+                    <span className="rounded-full bg-white/10 px-3 py-1 text-xs">
+                      {transaction.type}
+                    </span>
+                  )}
+                </td>
+
+                <td className="px-4 py-3 text-slate-400">
+                  {editingId === transaction.id ? (
+                    <input
+                      type="date"
+                      value={
+                        typeof editData.date === "string"
+                          ? editData.date
+                          : transaction.date.split("T")[0]
+                      }
+                      onChange={(e) =>
+                        setEditData((prev) => ({
+                          ...prev,
+                          date: e.target.value,
+                        }))
+                      }
+                      className="rounded-lg bg-slate-900 p-2 text-sm"
+                    />
+                  ) : (
+                    formatDate(transaction.date)
+                  )}
+                </td>
+
                 <td
                   className={
                     transaction.type === "INCOME"
@@ -124,8 +226,60 @@ const TransactionsTable = ({ transactions }: TransactionsTableProps) => {
                       : "px-4 py-3 text-right font-semibold text-red-400"
                   }
                 >
-                  {transaction.type === "INCOME" ? "+" : "-"}
-                  {formatCurrency(transaction.amount)}
+                  {editingId === transaction.id ? (
+                    <input
+                      type="number"
+                      value={editData.amount || ""}
+                      onChange={(e) =>
+                        setEditData((prev) => ({
+                          ...prev,
+                          amount: Number(e.target.value),
+                        }))
+                      }
+                      className="w-28 rounded-lg bg-slate-900 p-2 text-right text-sm"
+                    />
+                  ) : (
+                    <>
+                      {transaction.type === "INCOME" ? "+" : "-"}
+                      {formatCurrency(transaction.amount)}
+                    </>
+                  )}
+                </td>
+
+                <td className="px-4 py-3 text-center">
+                  {editingId === transaction.id ? (
+                    <div className="flex justify-center gap-2">
+                      <button
+                        onClick={() => saveEditing(transaction.id)}
+                        className="rounded-lg bg-emerald-500 px-3 py-1 text-xs font-medium text-white"
+                      >
+                        Save
+                      </button>
+
+                      <button
+                        onClick={cancelEditing}
+                        className="rounded-lg bg-white/10 px-3 py-1 text-xs font-medium text-white"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex justify-center gap-2">
+                      <button
+                        onClick={() => startEditing(transaction)}
+                        className="rounded-lg bg-blue-500 px-3 py-1 text-xs font-medium text-white"
+                      >
+                        Edit
+                      </button>
+
+                      <button
+                        onClick={() => onDeleteTransaction(transaction.id)}
+                        className="rounded-lg bg-red-500 px-3 py-1 text-xs font-medium text-white"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  )}
                 </td>
               </tr>
             ))}

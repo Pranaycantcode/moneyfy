@@ -9,11 +9,10 @@ import {
   createTransaction,
   getAllTransactions,
   importTransactionsFromCsv,
+  deleteTransaction,
+  updateTransaction,
 } from "@/services/transactionService";
-import {
-  CreateTransactionInput,
-  Transaction,
-} from "@/types/transaction";
+import { CreateTransactionInput, Transaction } from "@/types/transaction";
 
 export default function TransactionsPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -41,6 +40,26 @@ export default function TransactionsPage() {
     await loadTransactions();
   };
 
+  const handleUpdateTransaction = async (
+    id: string,
+    data: Partial<CreateTransactionInput>,
+  ) => {
+    await updateTransaction(id, data);
+    await loadTransactions();
+  };
+
+  const handleDeleteTransaction = async (transactionId: string) => {
+    const confirmed = window.confirm("Delete this transaction?");
+
+    if (!confirmed) {
+      return;
+    }
+
+    await deleteTransaction(transactionId);
+
+    await loadTransactions();
+  };
+
   useEffect(() => {
     loadTransactions();
   }, []);
@@ -64,7 +83,11 @@ export default function TransactionsPage() {
         {loading ? (
           <p className="text-slate-400">Loading transactions...</p>
         ) : (
-          <TransactionsTable transactions={transactions} />
+          <TransactionsTable
+            transactions={transactions}
+            onDeleteTransaction={handleDeleteTransaction}
+            onUpdateTransaction={handleUpdateTransaction}
+          />
         )}
       </div>
     </DashboardLayout>
