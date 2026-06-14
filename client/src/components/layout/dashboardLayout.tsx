@@ -62,6 +62,13 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
           >
             Budgets
           </Link>
+
+          <Link
+            href="/net-worth"
+            className="rounded-lg bg-white/10 px-4 py-2 text-sm text-slate-300"
+          >
+            Net Worth
+          </Link>
         </nav>
 
         {children}
