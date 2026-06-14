@@ -28,6 +28,7 @@ import TransactionImportForm from "@/components/transactions/transactionImportFo
 import { importTransactionsFromCsv } from "@/services/transactionService";
 import AddBudgetForm from "@/components/budgets/addBudgetForm";
 import BudgetProgressList from "@/components/budgets/budgetProgressList";
+import Link from "next/link";
 
 import { createBudget, getBudgetSummary } from "@/services/budgetService";
 
@@ -211,19 +212,59 @@ export default function Home() {
 
         <NetWorthSummary summary={netWorthSummary} />
 
-        <AddTransactionForm onAddTransaction={handleAddTransaction} />
+        <div className="grid gap-4 md:grid-cols-4">
+          <Link
+            href="/transactions"
+            className="rounded-2xl border border-white/10 bg-white/5 p-5"
+          >
+            <h3 className="font-semibold">Transactions</h3>
+            <p className="mt-1 text-sm text-slate-400">
+              Manage financial activity
+            </p>
+          </Link>
+
+          <Link
+            href="/goals"
+            className="rounded-2xl border border-white/10 bg-white/5 p-5"
+          >
+            <h3 className="font-semibold">Goals</h3>
+            <p className="mt-1 text-sm text-slate-400">Track savings goals</p>
+          </Link>
+
+          <Link
+            href="/budgets"
+            className="rounded-2xl border border-white/10 bg-white/5 p-5"
+          >
+            <h3 className="font-semibold">Budgets</h3>
+            <p className="mt-1 text-sm text-slate-400">
+              Monitor spending limits
+            </p>
+          </Link>
+
+          <Link
+            href="/net-worth"
+            className="rounded-2xl border border-white/10 bg-white/5 p-5"
+          >
+            <h3 className="font-semibold">Net Worth</h3>
+            <p className="mt-1 text-sm text-slate-400">
+              Assets and liabilities
+            </p>
+          </Link>
+        </div>
+
+        {/* <AddTransactionForm onAddTransaction={handleAddTransaction} />
         <TransactionImportForm
           onImportTransactions={handleImportTransactions}
         />
         <AddGoalForm onAddGoal={handleAddGoal} />
 
-        <AddNetWorthItemForm onAddItem={handleAddNetWorthItem} />
+        <AddNetWorthItemForm onAddItem={handleAddNetWorthItem} /> */}
 
-        <AddRecurringTransactionForm
+        {/* <AddRecurringTransactionForm
           onAddRecurringTransaction={handleAddRecurringTransaction}
         />
 
-        <AddBudgetForm onAddBudget={handleAddBudget} />
+        <AddBudgetForm onAddBudget={handleAddBudget} /> */}
 
         <NetWorthList items={netWorthItems} />
 
@@ -234,12 +275,12 @@ export default function Home() {
           onToggleRecurringTransaction={handleToggleRecurringTransaction}
         />
 
-        <div className="grid gap-6 xl:grid-cols-3">
+        {/* <div className="grid gap-6 xl:grid-cols-3">
           <div className="xl:col-span-2">
             <RecentTransactions transactions={transactions} />
           </div>
-
-          {/* <section className="rounded-2xl border border-white/10 bg-white/5 p-5">
+ */}
+        {/* <section className="rounded-2xl border border-white/10 bg-white/5 p-5">
             <h2 className="text-lg font-semibold">Category Breakdown</h2>
             <div className="mt-5 space-y-3">
               {categoryBreakdown.map((item) => (
@@ -255,7 +296,7 @@ export default function Home() {
               ))}
             </div>
           </section> */}
-        </div>
+        {/*  </div> */}
 
         {/* <section className="rounded-2xl border border-white/10 bg-white/5 p-5">
           <h2 className="text-lg font-semibold">Monthly Cashflow</h2>
