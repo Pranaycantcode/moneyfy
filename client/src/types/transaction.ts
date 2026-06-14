@@ -8,6 +8,7 @@ export interface Transaction {
   category: string;
   date: string;
   note?: string;
+  accountId?: string | null;
 }
 
 export interface CreateTransactionInput {
@@ -17,4 +18,5 @@ export interface CreateTransactionInput {
   category: string;
   date: string;
   note?: string;
+  accountId?: string;
 }

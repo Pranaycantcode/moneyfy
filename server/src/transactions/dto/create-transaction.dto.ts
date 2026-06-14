@@ -6,5 +6,6 @@ export class CreateTransactionDto {
   type: TransactionType;
   category: string;
   date: string;
+  accountId?: string;
   note?: string;
 }

@@ -6,6 +6,7 @@ export class UpdateTransactionDto {
   amount?: number;
   type?: 'INCOME' | 'EXPENSE';
   category?: string;
+  accountId?: string;
   note?: string;
   date?: string;
 }

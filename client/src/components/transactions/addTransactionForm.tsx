@@ -2,12 +2,17 @@
 
 import { useState } from "react";
 import { CreateTransactionInput, TransactionType } from "@/types/transaction";
+import { Account } from "@/types/account";
 
 interface AddTransactionFormProps {
   onAddTransaction: (transaction: CreateTransactionInput) => Promise<void>;
+  accounts?: Account[];
 }
 
-const AddTransactionForm = ({ onAddTransaction }: AddTransactionFormProps) => {
+const AddTransactionForm = ({
+  onAddTransaction,
+  accounts = [],
+}: AddTransactionFormProps) => {
   const [formData, setFormData] = useState<CreateTransactionInput>({
     title: "",
     amount: 0,
@@ -15,14 +20,12 @@ const AddTransactionForm = ({ onAddTransaction }: AddTransactionFormProps) => {
     category: "",
     date: new Date().toISOString().split("T")[0],
     note: "",
+    accountId: "",
   });
 
   const [submitting, setSubmitting] = useState(false);
 
-  const handleChange = (
-    field: keyof CreateTransactionInput,
-    value: string
-  ) => {
+  const handleChange = (field: keyof CreateTransactionInput, value: string) => {
     setFormData((prev) => ({
       ...prev,
       [field]: field === "amount" ? Number(value) : value,
@@ -39,15 +42,24 @@ const AddTransactionForm = ({ onAddTransaction }: AddTransactionFormProps) => {
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
-    if (!formData.title || !formData.amount || !formData.category || !formData.date) {
+    if (
+      !formData.title ||
+      !formData.amount ||
+      !formData.category ||
+      !formData.date
+    ) {
       return;
     }
 
     setSubmitting(true);
 
     try {
-      await onAddTransaction(formData);
+      const payload: CreateTransactionInput = {
+        ...formData,
+        accountId: formData.accountId || undefined,
+      };
 
+      await onAddTransaction(payload);
       setFormData({
         title: "",
         amount: 0,
@@ -55,6 +67,7 @@ const AddTransactionForm = ({ onAddTransaction }: AddTransactionFormProps) => {
         category: "",
         date: new Date().toISOString().split("T")[0],
         note: "",
+        accountId: "",
       });
     } finally {
       setSubmitting(false);
@@ -69,6 +82,18 @@ const AddTransactionForm = ({ onAddTransaction }: AddTransactionFormProps) => {
       </p>
 
       <form onSubmit={handleSubmit} className="mt-5 grid gap-4 md:grid-cols-2">
+        <select
+          value={formData.accountId || ""}
+          onChange={(e) => handleChange("accountId", e.target.value)}
+          className="rounded-xl border border-white/10 bg-slate-900 p-3 text-sm outline-none"
+        >
+          <option value="">No account selected</option>
+          {accounts.map((account) => (
+            <option key={account.id} value={account.id}>
+              {account.name} ({account.type})
+            </option>
+          ))}
+        </select>
         <input
           value={formData.title}
           onChange={(e) => handleChange("title", e.target.value)}

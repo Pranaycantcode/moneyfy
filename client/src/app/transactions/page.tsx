@@ -5,6 +5,8 @@ import DashboardLayout from "@/components/layout/dashboardLayout";
 import TransactionsTable from "@/components/transactions/transactionsTable";
 import AddTransactionForm from "@/components/transactions/addTransactionForm";
 import TransactionImportForm from "@/components/transactions/transactionImportForm";
+import { getAccounts } from "@/services/accountService";
+import { Account } from "@/types/account";
 import {
   createTransaction,
   getAllTransactions,
@@ -17,12 +19,19 @@ import { CreateTransactionInput, Transaction } from "@/types/transaction";
 export default function TransactionsPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
+  const [accounts, setAccounts] = useState<Account[]>([]);
 
   const loadTransactions = async () => {
     try {
       setLoading(true);
-      const data = await getAllTransactions();
-      setTransactions(data);
+
+      const [transactionsData, accountsData] = await Promise.all([
+        getAllTransactions(),
+        getAccounts(),
+      ]);
+
+      setTransactions(transactionsData);
+      setAccounts(accountsData);
     } finally {
       setLoading(false);
     }
@@ -74,7 +83,10 @@ export default function TransactionsPage() {
           </p>
         </div>
 
-        <AddTransactionForm onAddTransaction={handleAddTransaction} />
+        <AddTransactionForm
+          onAddTransaction={handleAddTransaction}
+          accounts={accounts}
+        />
 
         <TransactionImportForm
           onImportTransactions={handleImportTransactions}

@@ -12,7 +12,19 @@ export class TransactionsService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(userId: string, createTransactionDto: CreateTransactionDto) {
-    return this.prisma.transaction.create({
+    if (createTransactionDto.accountId) {
+      const account = await this.prisma.account.findUnique({
+        where: {
+          id: createTransactionDto.accountId,
+        },
+      });
+
+      if (!account || account.userId !== userId) {
+        throw new NotFoundException('Account not found');
+      }
+    }
+
+    const transaction = await this.prisma.transaction.create({
       data: {
         title: createTransactionDto.title,
         amount: createTransactionDto.amount,
@@ -21,8 +33,29 @@ export class TransactionsService {
         date: new Date(createTransactionDto.date),
         note: createTransactionDto.note,
         userId,
+        accountId: createTransactionDto.accountId,
       },
     });
+
+    if (createTransactionDto.accountId) {
+      const balanceChange =
+        createTransactionDto.type === 'INCOME'
+          ? createTransactionDto.amount
+          : -createTransactionDto.amount;
+
+      await this.prisma.account.update({
+        where: {
+          id: createTransactionDto.accountId,
+        },
+        data: {
+          balance: {
+            increment: balanceChange,
+          },
+        },
+      });
+    }
+
+    return transaction;
   }
 
   async findAll(userId: string) {
@@ -103,23 +136,44 @@ export class TransactionsService {
     });
   }
 
-  async remove(userId: string, transactionId: string) {
-    const transaction = await this.prisma.transaction.findUnique({
+  async remove(
+  userId: string,
+  transactionId: string,
+) {
+  const transaction = await this.prisma.transaction.findUnique({
+    where: {
+      id: transactionId,
+    },
+  });
+
+  if (!transaction || transaction.userId !== userId) {
+    throw new NotFoundException('Transaction not found');
+  }
+
+  if (transaction.accountId) {
+    const balanceAdjustment =
+      transaction.type === 'INCOME'
+        ? -transaction.amount
+        : transaction.amount;
+
+    await this.prisma.account.update({
       where: {
-        id: transactionId,
+        id: transaction.accountId,
       },
-    });
-
-    if (!transaction || transaction.userId !== userId) {
-      throw new NotFoundException('Transaction not found');
-    }
-
-    return this.prisma.transaction.delete({
-      where: {
-        id: transactionId,
+      data: {
+        balance: {
+          increment: balanceAdjustment,
+        },
       },
     });
   }
+
+  return this.prisma.transaction.delete({
+    where: {
+      id: transactionId,
+    },
+  });
+}
 
   async getRecent(userId: string) {
     return this.prisma.transaction.findMany({
