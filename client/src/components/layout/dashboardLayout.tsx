@@ -48,6 +48,13 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
           >
             Transactions
           </Link>
+
+          <Link
+            href="/goals"
+            className="rounded-lg bg-white/10 px-4 py-2 text-sm text-slate-300"
+          >
+            Goals
+          </Link>
         </nav>
 
         {children}
