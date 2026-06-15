@@ -28,6 +28,9 @@ import TransactionImportForm from "@/components/transactions/transactionImportFo
 import { importTransactionsFromCsv } from "@/services/transactionService";
 import AddBudgetForm from "@/components/budgets/addBudgetForm";
 import BudgetProgressList from "@/components/budgets/budgetProgressList";
+import DashboardAccountOverview from "@/components/accounts/dashboardAccountOverview";
+import { getAccountSummary, getAccounts } from "@/services/accountService";
+import { Account, AccountSummary } from "@/types/account";
 import Link from "next/link";
 
 import { createBudget, getBudgetSummary } from "@/services/budgetService";
@@ -86,6 +89,10 @@ export default function Home() {
 
   const [netWorthItems, setNetWorthItems] = useState<NetWorthItem[]>([]);
   const [budgetSummary, setBudgetSummary] = useState<BudgetSummary[]>([]);
+  const [accounts, setAccounts] = useState<Account[]>([]);
+  const [accountSummary, setAccountSummary] = useState<AccountSummary | null>(
+    null,
+  );
 
   const currentDate = new Date();
 
@@ -106,6 +113,8 @@ export default function Home() {
         netWorthItemsData,
         recurringTransactionsData,
         budgetSummaryData,
+        accountsData,
+        accountSummaryData,
       ] = await Promise.all([
         getTransactionSummary(),
         getRecentTransactions(),
@@ -116,6 +125,8 @@ export default function Home() {
         getNetWorthItems(),
         getRecurringTransactions(),
         getBudgetSummary(currentMonth, currentYear),
+        getAccounts(),
+        getAccountSummary(),
       ]);
 
       setSummary(summaryData);
@@ -127,6 +138,8 @@ export default function Home() {
       setNetWorthItems(netWorthItemsData);
       setRecurringTransactions(recurringTransactionsData);
       setBudgetSummary(budgetSummaryData);
+      setAccounts(accountsData);
+      setAccountSummary(accountSummaryData);
       setError("");
     } catch (err) {
       console.error(err);
@@ -195,7 +208,7 @@ export default function Home() {
     );
   }
 
-  if (error || !summary || !netWorthSummary) {
+  if (error || !summary || !netWorthSummary || !accountSummary) {
     return (
       <DashboardLayout>
         <div className="rounded-2xl border border-red-500/20 bg-red-500/10 p-5 text-red-200">
@@ -211,6 +224,11 @@ export default function Home() {
         <AnalyticsGrid summary={summary} />
 
         <NetWorthSummary summary={netWorthSummary} />
+
+        <DashboardAccountOverview
+          accounts={accounts}
+          summary={accountSummary}
+        />
 
         <div className="grid gap-4 md:grid-cols-4">
           <Link
