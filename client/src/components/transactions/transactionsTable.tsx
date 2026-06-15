@@ -2,9 +2,11 @@
 
 import { useMemo, useState } from "react";
 import { CreateTransactionInput, Transaction } from "@/types/transaction";
+import { Account } from "@/types/account";
 
 interface TransactionsTableProps {
   transactions: Transaction[];
+  accounts: Account[];
   onDeleteTransaction: (id: string) => Promise<void>;
   onUpdateTransaction: (
     id: string,
@@ -26,6 +28,7 @@ const formatDate = (date: string) => {
 
 const TransactionsTable = ({
   transactions,
+  accounts,
   onDeleteTransaction,
   onUpdateTransaction,
 }: TransactionsTableProps) => {
@@ -33,6 +36,7 @@ const TransactionsTable = ({
   const [typeFilter, setTypeFilter] = useState("ALL");
   const [categoryFilter, setCategoryFilter] = useState("ALL");
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [accountFilter, setAccountFilter] = useState("ALL");
 
   const [editData, setEditData] = useState<Partial<CreateTransactionInput>>({});
 
@@ -54,9 +58,14 @@ const TransactionsTable = ({
       const matchesCategory =
         categoryFilter === "ALL" || transaction.category === categoryFilter;
 
-      return matchesSearch && matchesType && matchesCategory;
+      const matchesAccount =
+        accountFilter === "ALL" ||
+        (accountFilter === "NO_ACCOUNT" && !transaction.accountId) ||
+        transaction.accountId === accountFilter;
+
+      return matchesSearch && matchesType && matchesCategory && matchesAccount;
     });
-  }, [transactions, searchTerm, typeFilter, categoryFilter]);
+  }, [transactions, searchTerm, typeFilter, categoryFilter, accountFilter]);
 
   const startEditing = (transaction: Transaction) => {
     setEditingId(transaction.id);
@@ -90,7 +99,7 @@ const TransactionsTable = ({
         </p>
       </div>
 
-      <div className="mb-5 grid gap-3 md:grid-cols-3">
+      <div className="mb-5 grid gap-3 md:grid-cols-4">
         <input
           value={searchTerm}
           onChange={(event) => setSearchTerm(event.target.value)}
@@ -121,6 +130,20 @@ const TransactionsTable = ({
           ))}
         </select>
       </div>
+
+      <select
+        value={accountFilter}
+        onChange={(event) => setAccountFilter(event.target.value)}
+        className="rounded-xl border border-white/10 bg-slate-900 p-3 text-sm outline-none"
+      >
+        <option value="ALL">All Accounts</option>
+        <option value="NO_ACCOUNT">No Account</option>
+        {accounts.map((account) => (
+          <option key={account.id} value={account.id}>
+            {account.name}
+          </option>
+        ))}
+      </select>
 
       <div className="overflow-hidden rounded-xl border border-white/10">
         <table className="w-full text-left text-sm">

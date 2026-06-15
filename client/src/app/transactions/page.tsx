@@ -97,6 +97,7 @@ export default function TransactionsPage() {
         ) : (
           <TransactionsTable
             transactions={transactions}
+            accounts={accounts}
             onDeleteTransaction={handleDeleteTransaction}
             onUpdateTransaction={handleUpdateTransaction}
           />
