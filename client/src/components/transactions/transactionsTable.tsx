@@ -37,6 +37,7 @@ const TransactionsTable = ({
   const [categoryFilter, setCategoryFilter] = useState("ALL");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [accountFilter, setAccountFilter] = useState("ALL");
+  const [sortBy, setSortBy] = useState("date-desc");
 
   const [editData, setEditData] = useState<Partial<CreateTransactionInput>>({});
 
@@ -66,6 +67,33 @@ const TransactionsTable = ({
       return matchesSearch && matchesType && matchesCategory && matchesAccount;
     });
   }, [transactions, searchTerm, typeFilter, categoryFilter, accountFilter]);
+
+  const sortedTransactions = useMemo(() => {
+    return [...filteredTransactions].sort((a, b) => {
+      switch (sortBy) {
+        case "date-asc":
+          return new Date(a.date).getTime() - new Date(b.date).getTime();
+
+        case "date-desc":
+          return new Date(b.date).getTime() - new Date(a.date).getTime();
+
+        case "amount-asc":
+          return a.amount - b.amount;
+
+        case "amount-desc":
+          return b.amount - a.amount;
+
+        case "title-asc":
+          return a.title.localeCompare(b.title);
+
+        case "title-desc":
+          return b.title.localeCompare(a.title);
+
+        default:
+          return 0;
+      }
+    });
+  }, [filteredTransactions, sortBy]);
 
   const startEditing = (transaction: Transaction) => {
     setEditingId(transaction.id);
@@ -99,7 +127,7 @@ const TransactionsTable = ({
         </p>
       </div>
 
-      <div className="mb-5 grid gap-3 md:grid-cols-4">
+      <div className="mb-5 grid gap-3 md:grid-cols-5">
         <input
           value={searchTerm}
           onChange={(event) => setSearchTerm(event.target.value)}
@@ -145,6 +173,19 @@ const TransactionsTable = ({
         ))}
       </select>
 
+      <select
+        value={sortBy}
+        onChange={(event) => setSortBy(event.target.value)}
+        className="rounded-xl border border-white/10 bg-slate-900 p-3 text-sm outline-none"
+      >
+        <option value="date-desc">Newest First</option>
+        <option value="date-asc">Oldest First</option>
+        <option value="amount-desc">Highest Amount</option>
+        <option value="amount-asc">Lowest Amount</option>
+        <option value="title-asc">Title A-Z</option>
+        <option value="title-desc">Title Z-A</option>
+      </select>
+
       <div className="overflow-hidden rounded-xl border border-white/10">
         <table className="w-full text-left text-sm">
           <thead className="bg-slate-900 text-slate-400">
@@ -160,7 +201,7 @@ const TransactionsTable = ({
           </thead>
 
           <tbody>
-            {filteredTransactions.map((transaction) => (
+            {sortedTransactions.map((transaction) => (
               <tr
                 key={transaction.id}
                 className="border-t border-white/10 bg-slate-950/40"
@@ -314,7 +355,7 @@ const TransactionsTable = ({
               </tr>
             ))}
 
-            {filteredTransactions.length === 0 && (
+            {sortedTransactions.length === 0 && (
               <tr>
                 <td
                   colSpan={7}
