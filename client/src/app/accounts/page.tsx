@@ -7,8 +7,10 @@ import AddAccountForm from "@/components/accounts/addAccountForm";
 import AccountsList from "@/components/accounts/accountsList";
 import {
   createAccount,
+  deleteAccount,
   getAccountSummary,
   getAccounts,
+  updateAccount,
 } from "@/services/accountService";
 import {
   Account,
@@ -42,6 +44,22 @@ export default function AccountsPage() {
     await loadAccounts();
   };
 
+  const handleUpdateAccount = async (id: string, data: Partial<Account>) => {
+    await updateAccount(id, data);
+    await loadAccounts();
+  };
+
+  const handleDeleteAccount = async (id: string) => {
+    const confirmed = window.confirm("Delete this account?");
+
+    if (!confirmed) {
+      return;
+    }
+
+    await deleteAccount(id);
+    await loadAccounts();
+  };
+
   useEffect(() => {
     loadAccounts();
   }, []);
@@ -52,7 +70,8 @@ export default function AccountsPage() {
         <div>
           <h2 className="text-2xl font-bold">Accounts</h2>
           <p className="mt-1 text-sm text-slate-400">
-            Manage bank accounts, cash wallets, investments, loans, and credit balances.
+            Manage bank accounts, cash wallets, investments, loans, and credit
+            balances.
           </p>
         </div>
 
@@ -64,7 +83,11 @@ export default function AccountsPage() {
 
             <AddAccountForm onAddAccount={handleAddAccount} />
 
-            <AccountsList accounts={accounts} />
+            <AccountsList
+              accounts={accounts}
+              onUpdateAccount={handleUpdateAccount}
+              onDeleteAccount={handleDeleteAccount}
+            />
           </>
         )}
       </div>

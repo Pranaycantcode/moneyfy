@@ -116,14 +116,68 @@ export class TransactionsService {
     transactionId: string,
     updateTransactionDto: UpdateTransactionDto,
   ) {
-    const transaction = await this.prisma.transaction.findUnique({
+    const existingTransaction = await this.prisma.transaction.findUnique({
       where: {
         id: transactionId,
       },
     });
 
-    if (!transaction || transaction.userId !== userId) {
+    if (!existingTransaction || existingTransaction.userId !== userId) {
       throw new NotFoundException('Transaction not found');
+    }
+
+    const newAccountId =
+      updateTransactionDto.accountId !== undefined
+        ? updateTransactionDto.accountId || null
+        : existingTransaction.accountId;
+
+    if (newAccountId) {
+      const account = await this.prisma.account.findUnique({
+        where: {
+          id: newAccountId,
+        },
+      });
+
+      if (!account || account.userId !== userId) {
+        throw new NotFoundException('Account not found');
+      }
+    }
+
+    const oldSignedAmount =
+      existingTransaction.type === 'INCOME'
+        ? existingTransaction.amount
+        : -existingTransaction.amount;
+
+    const newType = updateTransactionDto.type ?? existingTransaction.type;
+
+    const newAmount = updateTransactionDto.amount ?? existingTransaction.amount;
+
+    const newSignedAmount = newType === 'INCOME' ? newAmount : -newAmount;
+
+    if (existingTransaction.accountId) {
+      await this.prisma.account.update({
+        where: {
+          id: existingTransaction.accountId,
+        },
+        data: {
+          balance: {
+            decrement: oldSignedAmount,
+          },
+        },
+      });
+    }
+
+    if (newAccountId) {
+      await this.prisma.account.update({
+        where: {
+          id: newAccountId,
+        },
+        data: {
+          balance: {
+            increment: newSignedAmount,
+          },
+        },
+      });
     }
 
     return this.prisma.transaction.update({
@@ -132,6 +186,7 @@ export class TransactionsService {
       },
       data: {
         ...updateTransactionDto,
+        accountId: newAccountId,
         date: updateTransactionDto.date
           ? new Date(updateTransactionDto.date)
           : undefined,
