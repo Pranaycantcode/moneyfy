@@ -3,6 +3,7 @@
 import { CreateTransactionInput, Transaction } from "@/types/transaction";
 import { Account } from "@/types/account";
 import { useEffect, useMemo, useState } from "react";
+import { exportTransactionsToCsv } from "@/utils/exportCsv";
 
 interface TransactionsTableProps {
   transactions: Transaction[];
@@ -136,11 +137,20 @@ const TransactionsTable = ({
 
   return (
     <section className="rounded-2xl border border-white/10 bg-white/5 p-5">
-      <div className="mb-5">
-        <h2 className="text-lg font-semibold">All Transactions</h2>
-        <p className="text-sm text-slate-400">
-          Search, filter, and review all financial activity
-        </p>
+      <div className="mb-5 flex items-start justify-between gap-4">
+        <div>
+          <h2 className="text-lg font-semibold">All Transactions</h2>
+          <p className="text-sm text-slate-400">
+            Search, filter, and review all financial activity
+          </p>
+        </div>
+
+        <button
+          onClick={() => exportTransactionsToCsv(sortedTransactions)}
+          className="rounded-lg bg-cyan-300 px-4 py-2 text-sm font-semibold text-slate-950"
+        >
+          Export CSV
+        </button>
       </div>
 
       <div className="mb-5 grid gap-3 md:grid-cols-5">
