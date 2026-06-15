@@ -1,8 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
 import { CreateTransactionInput, Transaction } from "@/types/transaction";
 import { Account } from "@/types/account";
+import { useEffect, useMemo, useState } from "react";
 
 interface TransactionsTableProps {
   transactions: Transaction[];
@@ -38,6 +38,9 @@ const TransactionsTable = ({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [accountFilter, setAccountFilter] = useState("ALL");
   const [sortBy, setSortBy] = useState("date-desc");
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const transactionsPerPage = 10;
 
   const [editData, setEditData] = useState<Partial<CreateTransactionInput>>({});
 
@@ -94,6 +97,19 @@ const TransactionsTable = ({
       }
     });
   }, [filteredTransactions, sortBy]);
+
+  const totalPages = Math.ceil(sortedTransactions.length / transactionsPerPage);
+
+  const startIndex = (currentPage - 1) * transactionsPerPage;
+
+  const paginatedTransactions = sortedTransactions.slice(
+    startIndex,
+    startIndex + transactionsPerPage,
+  );
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, typeFilter, categoryFilter, accountFilter, sortBy]);
 
   const startEditing = (transaction: Transaction) => {
     setEditingId(transaction.id);
@@ -201,7 +217,7 @@ const TransactionsTable = ({
           </thead>
 
           <tbody>
-            {sortedTransactions.map((transaction) => (
+            {paginatedTransactions.map((transaction) => (
               <tr
                 key={transaction.id}
                 className="border-t border-white/10 bg-slate-950/40"
@@ -367,6 +383,42 @@ const TransactionsTable = ({
             )}
           </tbody>
         </table>
+        {sortedTransactions.length > 0 && (
+          <div className="mt-5 flex items-center justify-between text-sm text-slate-400">
+            <p>
+              Showing {startIndex + 1}-
+              {Math.min(
+                startIndex + transactionsPerPage,
+                sortedTransactions.length,
+              )}{" "}
+              of {sortedTransactions.length}
+            </p>
+
+            <div className="flex gap-2">
+              <button
+                onClick={() => setCurrentPage((page) => Math.max(page - 1, 1))}
+                disabled={currentPage === 1}
+                className="rounded-lg bg-white/10 px-3 py-2 disabled:opacity-40"
+              >
+                Previous
+              </button>
+
+              <span className="rounded-lg bg-white/10 px-3 py-2">
+                Page {currentPage} of {totalPages}
+              </span>
+
+              <button
+                onClick={() =>
+                  setCurrentPage((page) => Math.min(page + 1, totalPages))
+                }
+                disabled={currentPage === totalPages}
+                className="rounded-lg bg-white/10 px-3 py-2 disabled:opacity-40"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </section>
   );
