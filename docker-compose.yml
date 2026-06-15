@@ -19,5 +19,24 @@ services:
     ports:
       - "6379:6379"
 
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: moneyfy-server
+    restart: always
+    ports:
+      - "3001:3001"
+    environment:
+      PORT: 3001
+      DATABASE_URL: postgresql://moneyfy_user:moneyfy_password@postgres:5432/moneyfy_db?schema=public
+      JWT_SECRET: moneyfy_super_secret_key
+      JWT_EXPIRES_IN: 1d
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    depends_on:
+      - postgres
+      - redis
+
 volumes:
   postgres_data:
