@@ -128,6 +128,7 @@ const TransactionsTable = ({
             <tr>
               <th className="px-4 py-3 font-medium">Title</th>
               <th className="px-4 py-3 font-medium">Category</th>
+              <th className="px-4 py-3 font-medium">Account</th>
               <th className="px-4 py-3 font-medium">Type</th>
               <th className="px-4 py-3 font-medium">Date</th>
               <th className="px-4 py-3 text-right font-medium">Amount</th>
@@ -173,6 +174,12 @@ const TransactionsTable = ({
                   ) : (
                     transaction.category
                   )}
+                </td>
+
+                <td className="px-4 py-3 text-slate-400">
+                  {transaction.account
+                    ? transaction.account.name
+                    : "No account"}
                 </td>
 
                 <td className="px-4 py-3">
@@ -287,7 +294,7 @@ const TransactionsTable = ({
             {filteredTransactions.length === 0 && (
               <tr>
                 <td
-                  colSpan={5}
+                  colSpan={7}
                   className="px-4 py-6 text-center text-slate-500"
                 >
                   No transactions found.

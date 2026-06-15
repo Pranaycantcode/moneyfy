@@ -61,6 +61,9 @@ export class TransactionsService {
   async findAll(userId: string) {
     return this.prisma.transaction.findMany({
       where: { userId },
+      include: {
+        account: true,
+      },
       orderBy: { date: 'desc' },
     });
   }
@@ -136,48 +139,48 @@ export class TransactionsService {
     });
   }
 
-  async remove(
-  userId: string,
-  transactionId: string,
-) {
-  const transaction = await this.prisma.transaction.findUnique({
-    where: {
-      id: transactionId,
-    },
-  });
-
-  if (!transaction || transaction.userId !== userId) {
-    throw new NotFoundException('Transaction not found');
-  }
-
-  if (transaction.accountId) {
-    const balanceAdjustment =
-      transaction.type === 'INCOME'
-        ? -transaction.amount
-        : transaction.amount;
-
-    await this.prisma.account.update({
+  async remove(userId: string, transactionId: string) {
+    const transaction = await this.prisma.transaction.findUnique({
       where: {
-        id: transaction.accountId,
+        id: transactionId,
       },
-      data: {
-        balance: {
-          increment: balanceAdjustment,
+    });
+
+    if (!transaction || transaction.userId !== userId) {
+      throw new NotFoundException('Transaction not found');
+    }
+
+    if (transaction.accountId) {
+      const balanceAdjustment =
+        transaction.type === 'INCOME'
+          ? -transaction.amount
+          : transaction.amount;
+
+      await this.prisma.account.update({
+        where: {
+          id: transaction.accountId,
         },
+        data: {
+          balance: {
+            increment: balanceAdjustment,
+          },
+        },
+      });
+    }
+
+    return this.prisma.transaction.delete({
+      where: {
+        id: transactionId,
       },
     });
   }
 
-  return this.prisma.transaction.delete({
-    where: {
-      id: transactionId,
-    },
-  });
-}
-
   async getRecent(userId: string) {
     return this.prisma.transaction.findMany({
       where: { userId },
+      include: {
+        account: true,
+      },
       orderBy: { date: 'desc' },
       take: 10,
     });

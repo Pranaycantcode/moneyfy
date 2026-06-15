@@ -9,6 +9,11 @@ export interface Transaction {
   date: string;
   note?: string;
   accountId?: string | null;
+  account?: {
+    id: string;
+    name: string;
+    type: string;
+  } | null;
 }
 
 export interface CreateTransactionInput {
