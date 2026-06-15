@@ -38,5 +38,18 @@ services:
       - postgres
       - redis
 
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: moneyfy-client
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:3001
+    depends_on:
+      - server  
+
 volumes:
   postgres_data:
